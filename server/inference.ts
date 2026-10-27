@@ -163,3 +163,65 @@ export function runPrototypeInference(csv: string): PrototypeInferenceResult {
 export function hasRequiredColumns(headers: string[]) {
   return REQUIRED_INPUT_COLUMNS.every(column => headers.includes(column as InputColumn));
 }
+
+export async function runInference(
+  csv: string,
+  serviceUrl = process.env.INFERENCE_SERVICE_URL ?? "http://127.0.0.1:8000"
+): Promise<PrototypeInferenceResult> {
+  try {
+    const formData = new FormData();
+    const blob = new Blob([csv], { type: "text/csv" });
+    formData.append("file", blob, "traffic.csv");
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+
+    const response = await fetch(`${serviceUrl.replace(/\/$/, "")}/predict`, {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (response.ok) {
+      const data = (await response.json()) as {
+        model_version?: string;
+        decision_threshold?: number;
+        rows_processed?: number;
+        prediction_counts?: { attack?: number; normal?: number };
+        results?: Array<Record<string, unknown>>;
+      };
+
+      const predictions: PrototypePrediction[] = (data.results ?? []).map((row, index) => {
+        const prob = Number(row.probability_attack ?? 0);
+        const pred = (row.prediction === 1 ? 1 : 0) as 0 | 1;
+        return {
+          rowNumber: index + 2,
+          prediction: pred,
+          predictionName: pred === 1 ? "attack" : "normal",
+          probabilityAttack: prob,
+          severity: severity(prob),
+          srcIp: typeof row.src_ip === "string" ? row.src_ip : undefined,
+          dstIp: typeof row.dst_ip === "string" ? row.dst_ip : undefined,
+          dstPort: row.dst_port ? numeric(row.dst_port) : undefined,
+          proto: typeof row.proto === "string" ? row.proto : undefined,
+          connState: typeof row.conn_state === "string" ? row.conn_state : undefined,
+        };
+      });
+
+      return {
+        modelVersion: data.model_version ?? "ton-iot-mlp-deduplicated-v1",
+        decisionThreshold: Number(data.decision_threshold ?? 0.85),
+        rowCount: data.rows_processed ?? predictions.length,
+        attackCount: data.prediction_counts?.attack ?? predictions.filter(p => p.prediction === 1).length,
+        normalCount: data.prediction_counts?.normal ?? predictions.filter(p => p.prediction === 0).length,
+        predictions,
+      };
+    }
+  } catch {
+    // Microservice unreachable, offline, or timed out; seamless fallback to built-in detection
+  }
+
+  return runPrototypeInference(csv);
+}
+

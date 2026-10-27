@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { REQUIRED_INPUT_COLUMNS, runPrototypeInference } from "./inference";
+import { REQUIRED_INPUT_COLUMNS, runInference, runPrototypeInference } from "./inference";
 
 function csvWithRow(overrides: Record<string, string> = {}) {
   const headers = [...REQUIRED_INPUT_COLUMNS, "src_ip", "dst_ip"];
@@ -32,4 +32,14 @@ describe("prototype inference adapter", () => {
     expect(result.predictions[0]?.probabilityAttack).toBeGreaterThanOrEqual(0.85);
     expect(result.predictions[0]?.severity).toMatch(/high|critical/);
   });
+
+  it("falls back to local inference when the microservice is unreachable", async () => {
+    const result = await runInference(
+      csvWithRow({ dst_port: "80", src_bytes: "300", dst_bytes: "1800" }),
+      "http://127.0.0.1:9999" // Non-existent port
+    );
+    expect(result.rowCount).toBe(1);
+    expect(result.attackCount).toBe(0);
+  });
 });
+

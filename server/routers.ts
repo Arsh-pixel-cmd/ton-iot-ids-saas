@@ -16,6 +16,7 @@ import {
   PROTOTYPE_DECISION_THRESHOLD,
   PROTOTYPE_MODEL_VERSION,
   REQUIRED_INPUT_COLUMNS,
+  runInference,
   runPrototypeInference,
 } from "./inference";
 
@@ -84,7 +85,7 @@ export const appRouter = router({
         const organization = await getOrCreateOrganizationForUser(ctx.user.id, ctx.user.name);
         let result;
         try {
-          result = runPrototypeInference(input.csv);
+          result = await runInference(input.csv);
         } catch (error) {
           throw new TRPCError({
             code: "BAD_REQUEST",
