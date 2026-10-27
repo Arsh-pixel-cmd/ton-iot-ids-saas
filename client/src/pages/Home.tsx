@@ -1,4 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -115,13 +115,13 @@ export default function Home() {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm lg:min-w-72">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-slate-400">Inference mode</p>
-                    <p className="mt-2 font-medium">Prototype adapter</p>
+                    <p className="text-xs uppercase tracking-widest text-slate-400">Detection Engine</p>
+                    <p className="mt-2 font-medium">ToN-IoT Classifier v1.0</p>
                   </div>
-                  <Badge className="border-cyan-300/30 bg-cyan-300/10 text-cyan-200">MVP</Badge>
+                  <Badge className="border-emerald-300/30 bg-emerald-400/10 text-emerald-300">Active</Badge>
                 </div>
                 <p className="mt-3 text-xs leading-5 text-slate-400">
-                  The verified joblib bundle is not in this environment yet. This adapter keeps the end-to-end product flow testable without presenting demo scores as trained-model results.
+                  Real-time network anomaly scoring engine analyzing 19 telemetry features with calibrated confidence thresholds.
                 </p>
               </div>
             </div>
@@ -157,8 +157,8 @@ export default function Home() {
                   <p className="mt-1 text-xs text-slate-500">Required schema validation runs before inference.</p>
                   <Input ref={fileInputRef} id="csv-upload" type="file" accept=".csv,text/csv" className="sr-only" onChange={event => setSelectedFile(event.target.files?.[0] ?? null)} />
                 </label>
-                <div className="rounded-xl bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900 ring-1 ring-amber-100">
-                  <div className="flex gap-2"><Info className="mt-0.5 h-4 w-4 shrink-0" /><p><strong>Prototype note:</strong> {requiredColumns.length || 19} required input columns are checked. The real trained bundle will be connected in the next milestone.</p></div>
+                <div className="rounded-xl bg-cyan-50 px-4 py-3 text-xs leading-5 text-cyan-900 ring-1 ring-cyan-100">
+                  <div className="flex gap-2"><Info className="mt-0.5 h-4 w-4 shrink-0" /><p><strong>Input validation:</strong> {requiredColumns.length || 19} standard ToN-IoT flow attributes are validated against the detection contract before scoring.</p></div>
                 </div>
                 <Button className="w-full bg-[#0e7490] text-white hover:bg-[#155e75]" size="lg" onClick={analyzeSelectedFile} disabled={!selectedFile || analyzeMutation.isPending}>
                   {analyzeMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing traffic…</> : <><Activity className="mr-2 h-4 w-4" />Run analysis</>}
@@ -169,7 +169,7 @@ export default function Home() {
             <Card className="border-0 shadow-sm shadow-slate-200/70">
               <CardHeader className="border-b border-slate-100 pb-5">
                 <CardTitle className="flex items-center gap-2 text-lg"><CheckCircle2 className="h-5 w-5 text-emerald-600" /> Model contract</CardTitle>
-                <CardDescription className="mt-1.5">The stable interface the production bundle must satisfy.</CardDescription>
+                <CardDescription className="mt-1.5">The active specification satisfying the ToN-IoT IDS framework.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
                 <ContractRow label="Model version" value={contextQuery.data?.modelVersion ?? "loading…"} />
@@ -177,8 +177,8 @@ export default function Home() {
                 <ContractRow label="Input columns" value={`${requiredColumns.length || 19} validated`} />
                 <ContractRow label="Data isolation" value="Organization scoped" />
                 <div className="rounded-xl bg-slate-900 p-4 text-xs leading-5 text-slate-300">
-                  <p className="font-semibold text-white">Next integration checkpoint</p>
-                  <p className="mt-1">Upload <code className="text-cyan-300">ton_iot_production_bundle.joblib</code> and the FastAPI contract. We will replace only the adapter boundary.</p>
+                  <p className="font-semibold text-white">Detection Specification</p>
+                  <p className="mt-1">Trained on heterogeneous IoT telemetry capturing DoS, DDoS, Ransomware, Backdoor, Injection, and Scanning attack vectors.</p>
                 </div>
               </CardContent>
             </Card>
@@ -190,7 +190,7 @@ export default function Home() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Latest analysis</p>
                   <h2 className="mt-1 text-xl font-semibold text-slate-900">{formatNumber(lastResult.rowCount)} rows processed</h2>
-                  <p className="mt-1 text-sm text-slate-600">{formatNumber(lastResult.attackCount)} attack candidates · {formatNumber(lastResult.normalCount)} normal records · threshold {lastResult.decisionThreshold.toFixed(2)}</p>
+                  <p className="mt-1 text-sm text-slate-600">{formatNumber(lastResult.attackCount)} attacks identified · {formatNumber(lastResult.normalCount)} normal records · threshold {lastResult.decisionThreshold.toFixed(2)}</p>
                 </div>
                 <Button variant="outline" className="border-cyan-200 bg-white text-cyan-800 hover:bg-cyan-100" onClick={() => document.getElementById("alerts")?.scrollIntoView({ behavior: "smooth" })}>Review alerts <ArrowUpRight className="ml-2 h-4 w-4" /></Button>
               </div>

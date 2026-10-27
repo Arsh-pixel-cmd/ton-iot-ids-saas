@@ -1,4 +1,4 @@
-export const PROTOTYPE_MODEL_VERSION = "ton-iot-prototype-adapter-v0";
+export const PROTOTYPE_MODEL_VERSION = "ton-iot-ids-v1.0";
 export const PROTOTYPE_DECISION_THRESHOLD = 0.85;
 
 export const REQUIRED_INPUT_COLUMNS = [

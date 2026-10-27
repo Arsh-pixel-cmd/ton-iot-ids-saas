@@ -1,7 +1,6 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import type { User } from "../../drizzle/schema";
+import type { User } from "../drizzle/schema";
 import { sdk } from "./sdk";
-
 import { ENV } from "./env";
 
 export type TrpcContext = {
@@ -30,7 +29,6 @@ export async function createContext(
   try {
     user = await sdk.authenticateRequest(opts.req);
   } catch (error) {
-    // If no OAuth server is configured or running locally in development, fallback to local dev user
     if (!ENV.oAuthServerUrl || process.env.NODE_ENV === "development") {
       user = DEV_USER;
     } else {

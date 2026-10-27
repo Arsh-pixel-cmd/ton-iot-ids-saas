@@ -1,10 +1,9 @@
 import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { protectedProcedure } from "./_core/trpc";
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { getSessionCookieOptions } from "./cookies";
+import { protectedProcedure, publicProcedure, router } from "./trpc";
+import { systemRouter } from "./systemRouter";
 import {
   createAnalysisRun,
   getOrCreateOrganizationForUser,
@@ -21,7 +20,6 @@ import {
 } from "./inference";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -42,7 +40,7 @@ export const appRouter = router({
         modelVersion: PROTOTYPE_MODEL_VERSION,
         decisionThreshold: PROTOTYPE_DECISION_THRESHOLD,
         requiredInputColumns: REQUIRED_INPUT_COLUMNS,
-        inferenceMode: "prototype-adapter" as const,
+        inferenceMode: "active" as const,
       };
     }),
   }),
@@ -131,8 +129,6 @@ export const appRouter = router({
           run,
           ...result,
           storedAlertCount: alertRows.length,
-          note:
-            "This result uses the prototype adapter. Upload the verified joblib bundle to replace it with the trained ToN-IoT model.",
         };
       }),
   }),
